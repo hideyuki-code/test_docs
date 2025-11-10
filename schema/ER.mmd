@@ -1,0 +1,80 @@
+erDiagram
+    users {
+        BIGINT id PK
+        STRING employee_number "unique (4桁、先頭0許容)"
+        STRING last_name
+        STRING first_name
+        STRING last_name_kana
+        STRING first_name_kana
+        STRING email "unique"
+        ENUM role "admin, writer, reader"
+        ENUM invitation_status "invited, registered"
+        BOOLEAN join_confirmed
+        ENUM join_category "新卒, 中途"
+        DATETIME created_at
+        DATETIME updated_at
+    }
+
+    organizations {
+        BIGINT id PK
+        STRING name
+        BIGINT manager_user_id FK
+        BIGINT parent_organization_id FK
+        DATETIME created_at
+        DATETIME updated_at
+    }
+
+    user_organization_histories {
+        BIGINT id PK
+        BIGINT user_id FK
+        BIGINT organization_id FK
+        DATE assigned_at "配属日"
+        DATE left_at "離籍日 (NULL=在籍中)"
+        DATETIME created_at
+        DATETIME updated_at
+    }
+
+    user_employment_histories {
+        BIGINT id PK
+        BIGINT user_id FK
+        DATE assigned_at "配属日"
+        DATE left_at "離籍日"
+        ENUM employment_type "役員, 正社員, 契約社員(有期), 契約社員(トライアル), アルバイト, 業務委託"
+        ENUM work_engagement "常駐, 非常駐"
+        ENUM location "東京本社, 大阪支社, 在宅"
+        ENUM working_pattern "変形労働時間制（WAL型）, 完全週休二日制（WLB型）, シフト制"
+        ENUM intern_category "インターン, 内定者インターン"
+        ENUM work_hours "9:00-18:00, 10:00-19:00, フレックス, その他"
+        STRING work_hours_detail
+        DATETIME created_at
+        DATETIME updated_at
+    }
+
+    referrals {
+        BIGINT id PK
+        BIGINT user_id FK
+        ENUM source "人材紹介, リファーラル, 求人広告, ハローワーク, スカウト媒体"
+        BIGINT referrer_user_id FK
+        DATE reward_paid_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+
+    user_grants {
+        BIGINT id PK
+        BIGINT user_id FK
+        ENUM grant_type "人開金（人材育成支援コース）, トライアル雇（障がい者）＋特開金, 特開金（特定就職困難者コース）, キャリアアップ（正社員化コース）, 人開金（人への投資促進コース）, 人開金（事業展開等リスキリング支援コース）"
+        DATETIME created_at
+    }
+
+    %% Relationships
+    users ||--o{ user_organization_histories : has
+    organizations ||--o{ user_organization_histories : has
+    organizations }o--|| users : manager
+    organizations ||--o{ organizations : parent_child
+
+    users ||--o{ user_employment_histories : has
+    users ||--o{ referrals : has
+    users ||--o{ user_grants : has
+
+
